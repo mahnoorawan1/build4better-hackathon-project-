@@ -84,8 +84,44 @@ const PRACTICE_MACHINES = [
   },
 ]
 
+const LEARNING_STEPS = [
+  {
+    mode: 'learn',
+    number: '1',
+    icon: '📖',
+    title: 'Learn',
+    titleUrdu: 'سیکھیں اور سمجھیں',
+    description:
+      'Read simple, calm explanations of what each screen is asking and what every button does before you touch anything.',
+    descriptionUrdu:
+      'کوئی بھی بٹن دبانے سے پہلے آسان الفاظ میں سمجھیں کہ اسکرین پر ہر بٹن کا کیا مطلب ہے۔',
+  },
+  {
+    mode: 'practice',
+    number: '2',
+    icon: '🎯',
+    title: 'Guided Practice',
+    titleUrdu: 'رہنمائی کے ساتھ مشق',
+    description:
+      'Follow step-by-step coaching, try making a mistake in a safe environment, and practice using Back or Edit to fix it.',
+    descriptionUrdu:
+      'مرحلہ وار اشاروں کے ساتھ مشق کریں اور بے خوف ہو کر اپنی غلطی درست کرنے کا طریقہ سیکھیں۔',
+  },
+  {
+    mode: 'independent',
+    number: '3',
+    icon: '⭐',
+    title: 'Independent Practice',
+    titleUrdu: 'خودکار مشق',
+    description:
+      'Complete the whole task with fewer hints — just like using a real machine in public, with Help still one tap away.',
+    descriptionUrdu:
+      'حقیقی مشین کی طرح کم اشاروں کے ساتھ خود مشق کریں تاکہ آپ کا اعتماد مکمل طور پر مضبوط ہو۔',
+  },
+]
+
 const HOME_SPEECH_TEXT =
-  'Welcome to Kiosk of Confidence. Practice first. Use technology independently. This is a safe practice website with three touchscreen simulators: ATM Practice, Ticket Booking Practice, and Food Ordering Practice. Touch any Start Practice button to begin.'
+  'Welcome to Kiosk of Confidence. Practice first. Use technology independently. This is a safe practice website with three touchscreen simulators: ATM Practice, Ticket Booking Practice, and Food Ordering Practice. Touch Start Learning or any Start Practice button to begin.'
 
 export default function App() {
   const [activeMachine, setActiveMachine] = useState('home') // 'home' | 'atm' | 'ticket' | 'food'
@@ -149,18 +185,30 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleStartMachine = (machineId, mode = 'practice') => {
+  const handleStartMachine = (machineId, mode = learningMode) => {
     stopSpeech()
     setLearningMode(mode)
     setActiveMachine(machineId)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleScrollToMachines = () => {
+    const el = document.getElementById('practice-machines')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
-    <div className={`app-shell ${largeText ? 'extra-large-text' : ''}`}>
+    <div
+      className={`app-shell ${largeText ? 'extra-large-text' : ''} ${
+        language === 'ur' ? 'rtl-mode' : ''
+      }`}
+    >
       <Header
         activeMachine={activeMachine}
         onGoHome={handleGoHome}
+        onSelectMachine={(id) => handleStartMachine(id, learningMode)}
         learningMode={learningMode}
         onSelectLearningMode={(mode) => setLearningMode(mode)}
         language={language}
@@ -187,73 +235,121 @@ export default function App() {
         {/* HOME PAGE */}
         {activeMachine === 'home' && (
           <div className="home-view">
-            {/* Hero Section */}
+            {/* Consumer Hero Section */}
             <section className="hero-banner" aria-labelledby="hero-title">
-              <div className="hero-badge-row">
-                <span className="hero-pill">
-                  🌱 Beginner-Friendly Touchscreen Practice
-                </span>
-                <span className="hero-pill" lang="ur" dir="rtl">
-                  بزرگوں اور نئے سیکھنے والوں کے لیے آسان مشق
-                </span>
+              <div className="hero-content-col">
+                <div className="hero-badge-row">
+                  <span className="hero-pill">
+                    🛡️ 100% Safe Touchscreen Practice
+                  </span>
+                  {showUrdu && (
+                    <span className="hero-pill" lang="ur" dir="rtl">
+                      بزرگوں اور نئے سیکھنے والوں کے لیے محفوظ مشق
+                    </span>
+                  )}
+                </div>
+
+                <h1 id="hero-title" className="hero-title">
+                  Kiosk of Confidence
+                </h1>
+
+                {showEnglish && (
+                  <p className="hero-tagline">
+                    Practice first. Use technology independently.
+                  </p>
+                )}
+                {showUrdu && (
+                  <p className="hero-tagline-urdu" lang="ur" dir="rtl">
+                    پہلے مشق کریں۔ پھر خود اعتمادی کے ساتھ ٹیکنالوجی استعمال کریں۔
+                  </p>
+                )}
+
+                {showEnglish && (
+                  <p className="hero-explanation">
+                    Feeling nervous at an ATM, ticket machine, or restaurant kiosk is completely natural. Build real-world confidence at your own pace through calm, guided simulations — with zero real money, zero personal data, and complete freedom to make and fix mistakes.
+                  </p>
+                )}
+                {showUrdu && (
+                  <p className="hero-explanation-urdu" lang="ur" dir="rtl">
+                    اے ٹی ایم، ٹکٹ مشین یا ریستوران کی ٹچ اسکرین استعمال کرتے وقت جھجھک محسوس کرنا ایک عام بات ہے۔ یہاں آپ بغیر کسی خوف کے اپنی رفتار سے مشق کر سکتے ہیں۔ کوئی اصلی پیسہ یا ذاتی معلومات استعمال نہیں ہوتیں!
+                  </p>
+                )}
+
+                <div className="hero-cta-row">
+                  <button
+                    type="button"
+                    className="btn-hero-primary"
+                    onClick={handleScrollToMachines}
+                  >
+                    <div className="btn-hero-text">
+                      <span>Start Learning</span>
+                      {showUrdu && (
+                        <small lang="ur" dir="rtl">
+                          سیکھنا شروع کریں
+                        </small>
+                      )}
+                    </div>
+                    <span className="btn-hero-arrow" aria-hidden="true">
+                      ↓
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn-hero-secondary"
+                    onClick={() => speakText(HOME_SPEECH_TEXT)}
+                  >
+                    <span aria-hidden="true">{isSpeaking ? '⏹' : '🔊'}</span>
+                    <span>
+                      {isSpeaking ? 'Stop Audio' : 'Listen to Introduction'}
+                    </span>
+                    {showUrdu && (
+                      <span className="urdu-inline" lang="ur" dir="rtl">
+                        • تعارف سنیں
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              <h1 id="hero-title" className="hero-title">
-                Kiosk of Confidence
-              </h1>
-
-              {showEnglish && (
-                <p className="hero-tagline">
-                  Practice first. Use technology independently.
-                </p>
-              )}
-              {showUrdu && (
-                <p className="hero-tagline-urdu" lang="ur" dir="rtl">
-                  پہلے مشق کریں۔ پھر خود اعتمادی کے ساتھ ٹیکنالوجی استعمال کریں۔
-                </p>
-              )}
-
-              {showEnglish && (
-                <p className="hero-explanation">
-                  Feeling nervous in front of an ATM, train ticket kiosk, or fast-food touchscreen is completely normal. Here, you can practice at your own pace in a <strong>100% safe simulation</strong>. No real money, no bank cards, and no personal details are ever used — and making mistakes is the best way to learn!
-                </p>
-              )}
-              {showUrdu && (
-                <p className="hero-explanation-urdu" lang="ur" dir="rtl">
-                  اے ٹی ایم، ٹکٹ مشین یا ریستوران کی ٹچ اسکرین استعمال کرتے وقت جھجھک محسوس کرنا ایک عام بات ہے۔ یہاں آپ بغیر کسی ڈر کے اپنی رفتار سے مشق کر سکتے ہیں۔ اس ویب سائٹ پر کوئی اصلی پیسہ یا ذاتی معلومات استعمال نہیں ہوتیں — اور غلطی کر کے اسے سدھارنا ہی سیکھنے کا بہترین طریقہ ہے!
-                </p>
-              )}
-
-              {/* User Journey Visual Steps */}
-              <div className="journey-strip" aria-label="How your practice journey works">
-                <div className="journey-step">
-                  <span className="journey-num">1</span>
-                  <span>Select Machine</span>
-                  {showUrdu && <small lang="ur">مشین منتخب کریں</small>}
-                </div>
-                <span className="journey-arrow" aria-hidden="true">➔</span>
-                <div className="journey-step">
-                  <span className="journey-num">2</span>
-                  <span>Learn</span>
-                  {showUrdu && <small lang="ur">سمجھیں</small>}
-                </div>
-                <span className="journey-arrow" aria-hidden="true">➔</span>
-                <div className="journey-step">
-                  <span className="journey-num">3</span>
-                  <span>Practise</span>
-                  {showUrdu && <small lang="ur">مشق کریں</small>}
-                </div>
-                <span className="journey-arrow" aria-hidden="true">➔</span>
-                <div className="journey-step highlight">
-                  <span className="journey-num">4</span>
-                  <span>Make & Fix a Mistake</span>
-                  {showUrdu && <small lang="ur">غلطی درست کریں</small>}
-                </div>
-                <span className="journey-arrow" aria-hidden="true">➔</span>
-                <div className="journey-step">
-                  <span className="journey-num">5</span>
-                  <span>Complete Task!</span>
-                  {showUrdu && <small lang="ur">مکمل کریں</small>}
+              {/* Right Column: Visual Interactive Preview Card */}
+              <div className="hero-visual-col" aria-hidden="true">
+                <div className="hero-showcase-card">
+                  <div className="showcase-top-bar">
+                    <span className="showcase-dot" />
+                    <span className="showcase-dot" />
+                    <span className="showcase-dot" />
+                    <span className="showcase-label">Safe Practice Environment</span>
+                  </div>
+                  <div className="showcase-body">
+                    <div className="showcase-item">
+                      <span className="showcase-icon">🏧</span>
+                      <div>
+                        <strong>ATM Banking</strong>
+                        <small>Cash withdrawal & balance checks</small>
+                      </div>
+                      <span className="showcase-status">Simulated</span>
+                    </div>
+                    <div className="showcase-item">
+                      <span className="showcase-icon">🎫</span>
+                      <div>
+                        <strong>Station Tickets</strong>
+                        <small>Routes, classes & passenger counts</small>
+                      </div>
+                      <span className="showcase-status">Simulated</span>
+                    </div>
+                    <div className="showcase-item">
+                      <span className="showcase-icon">🍔</span>
+                      <div>
+                        <strong>Food Ordering</strong>
+                        <small>Menus, trays & pickup tokens</small>
+                      </div>
+                      <span className="showcase-status">Simulated</span>
+                    </div>
+                    <div className="showcase-reassurance">
+                      ✓ Make mistakes safely & learn how to fix them
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -262,7 +358,14 @@ export default function App() {
             {isHelpOpen && (
               <section className="home-help-box" aria-label="How to use Kiosk of Confidence">
                 <div className="home-help-header">
-                  <h2>❓ How to Use This Website (مدد اور رہنمائی)</h2>
+                  <div>
+                    <h2>❓ Quick Guide to Using This Platform</h2>
+                    {showUrdu && (
+                      <p className="urdu-text" lang="ur" dir="rtl">
+                        اس پلیٹ فارم کو استعمال کرنے کا آسان طریقہ
+                      </p>
+                    )}
+                  </div>
                   <button
                     type="button"
                     className="btn-secondary-small"
@@ -273,46 +376,46 @@ export default function App() {
                 </div>
                 <div className="home-help-grid">
                   <div className="home-help-item">
-                    <strong>🟢 Start Practice Button</strong>
+                    <strong>1. Choose Any Machine</strong>
                     <p>
-                      Opens the machine simulator with helpful step-by-step hints.
+                      Tap <em>Start Practice</em> on the ATM, Ticket Booking, or Food Ordering card below.
                     </p>
                     {showUrdu && (
                       <p lang="ur" dir="rtl">
-                        مشین کی مشق کو مرحلہ وار اشاروں کے ساتھ کھولتا ہے۔
+                        نیچے دی گئی کسی بھی مشین کے کارڈ پر ’’مشق شروع کریں‘‘ دبائیں۔
                       </p>
                     )}
                   </div>
                   <div className="home-help-item">
-                    <strong>📖 Learn Mode</strong>
+                    <strong>2. Switch Learning Modes Anytime</strong>
                     <p>
-                      Explains what every single button on the screen means before you touch it.
+                      Use <em>Learn</em> for detailed explanations, <em>Guided Practice</em> for hints, or <em>Independent</em> to test yourself.
                     </p>
                     {showUrdu && (
                       <p lang="ur" dir="rtl">
-                        اسکرین کے ہر بٹن کا مطلب آسان الفاظ میں سمجھاتا ہے۔
+                        سیکھنے، رہنمائی حاصل کرنے، یا خودکار مشق کے درمیان کسی بھی وقت تبدیلی کریں۔
                       </p>
                     )}
                   </div>
                   <div className="home-help-item">
-                    <strong>🔊 Listen Button</strong>
+                    <strong>3. Listen Out Loud</strong>
                     <p>
-                      Reads the instructions on the screen out loud using your device speaker.
+                      Press <em>🔊 Listen</em> in the top bar to have any screen read aloud clearly.
                     </p>
                     {showUrdu && (
                       <p lang="ur" dir="rtl">
-                        اسکرین پر لکھی ہدایات کو بلند آواز میں پڑھ کر سناتا ہے۔
+                        ہدایات کو بلند آواز میں سننے کے لیے اوپر ’’🔊 سنیں‘‘ بٹن دبائیں۔
                       </p>
                     )}
                   </div>
                   <div className="home-help-item">
-                    <strong>🔍 Text Size & Language</strong>
+                    <strong>4. Adjust Text & Language</strong>
                     <p>
-                      Use the top bar anytime to make letters Extra Large (A+) or switch between English and Urdu.
+                      Toggle <em>Aa Text: Extra Large</em> or switch between English and Urdu whenever you like.
                     </p>
                     {showUrdu && (
                       <p lang="ur" dir="rtl">
-                        الفاظ کو بڑا کرنے یا اردو/انگریزی زبان بدلنے کے لیے اوپر والے بٹن استعمال کریں۔
+                        الفاظ کو بڑا کرنے یا اردو اور انگریزی زبان کے انتخاب کے لیے اوپر والے بٹن استعمال کریں۔
                       </p>
                     )}
                   </div>
@@ -320,17 +423,68 @@ export default function App() {
               </section>
             )}
 
+            {/* Simple Three-Step Explanation: Learn, Guided Practice, Independent Practice */}
+            <section className="three-steps-section" aria-labelledby="how-it-works-heading">
+              <div className="section-header-block">
+                <span className="section-eyebrow">HOW IT WORKS • طریقۂ کار</span>
+                <div className="section-heading-row">
+                  {showEnglish && (
+                    <h2 id="how-it-works-heading">
+                      Build Confidence in Three Simple Steps
+                    </h2>
+                  )}
+                  {showUrdu && (
+                    <p className="urdu-section-subtitle" lang="ur" dir="rtl">
+                      تین آسان مراحل میں ٹچ اسکرین مشین استعمال کرنے کا اعتماد حاصل کریں
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="three-steps-grid">
+                {LEARNING_STEPS.map((step) => (
+                  <div key={step.mode} className="learning-step-card">
+                    <div className="learning-step-top">
+                      <span className="learning-step-badge">Step {step.number}</span>
+                      <span className="learning-step-icon" aria-hidden="true">
+                        {step.icon}
+                      </span>
+                    </div>
+                    {showEnglish && <h3>{step.title}</h3>}
+                    {showUrdu && (
+                      <p className="learning-step-urdu-title" lang="ur" dir="rtl">
+                        {step.titleUrdu}
+                      </p>
+                    )}
+                    {showEnglish && <p className="learning-step-desc">{step.description}</p>}
+                    {showUrdu && (
+                      <p className="learning-step-desc-urdu" lang="ur" dir="rtl">
+                        {step.descriptionUrdu}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
             {/* Three Practice Machine Cards */}
-            <section className="machines-section" aria-label="Choose a practice machine">
-              <div className="section-heading-row">
-                {showEnglish && (
-                  <h2>Choose a Machine to Start Practicing:</h2>
-                )}
-                {showUrdu && (
-                  <h2 className="urdu-heading" lang="ur" dir="rtl">
-                    مشق شروع کرنے کے لیے کوئی ایک مشین منتخب کریں:
-                  </h2>
-                )}
+            <section
+              id="practice-machines"
+              className="machines-section"
+              aria-labelledby="machines-heading"
+            >
+              <div className="section-header-block">
+                <span className="section-eyebrow">INTERACTIVE SIMULATORS • مشق کی مشینیں</span>
+                <div className="section-heading-row">
+                  {showEnglish && (
+                    <h2 id="machines-heading">Choose a Machine to Start Practicing</h2>
+                  )}
+                  {showUrdu && (
+                    <p className="urdu-section-subtitle" lang="ur" dir="rtl">
+                      مشق شروع کرنے کے لیے نیچے دی گئی کسی ایک مشین کا انتخاب کریں
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="machines-grid">
@@ -347,14 +501,14 @@ export default function App() {
 
             {/* Reassurance Footer Section */}
             <section className="safety-promise-card" aria-label="Safety promise">
-              <div className="safety-icon" aria-hidden="true">🛡️</div>
-              <div>
-                {showEnglish && (
-                  <h3>Our Safety Promise to Learners</h3>
-                )}
+              <div className="safety-icon" aria-hidden="true">
+                🛡️
+              </div>
+              <div className="safety-promise-content">
+                {showEnglish && <h3>Our Safety Promise to Every Learner</h3>}
                 {showEnglish && (
                   <p>
-                    This website never asks for your name, phone number, bank account, or real card PIN. You cannot lose money or break anything here. Feel free to press every button, test what happens when you make a mistake, and practice as many times as you like!
+                    This platform never asks for your name, phone number, bank account, or real card PIN. You cannot lose money or break anything here. Feel free to press every button, test what happens when you make a mistake, and practice as many times as you like.
                   </p>
                 )}
                 {showUrdu && (
@@ -411,11 +565,15 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <p>
-          <strong>Kiosk of Confidence</strong> — Practice first. Use technology independently. • 100% Simulated Educational Prototype (No real transactions).
-        </p>
+        <div className="footer-inner">
+          <p className="footer-brand">
+            <strong>Kiosk of Confidence</strong> — Practice first. Use technology independently.
+          </p>
+          <p className="footer-note">
+            100% Safe Educational Simulation • No Real Transactions or Personal Data
+          </p>
+        </div>
       </footer>
     </div>
   )
 }
-

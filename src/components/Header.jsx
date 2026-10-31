@@ -1,12 +1,13 @@
 import React from 'react'
 
 /**
- * Header component providing navigation back to Home, learning mode switching,
- * English/Urdu language controls, text size toggle, Text-to-Speech (Listen), and Help button.
+ * Header component with separated Primary Navigation, a grouped Accessibility Toolbar
+ * (Language, Text Size, Audio Listen, Help), and a dedicated Learning Mode Selector.
  */
 export default function Header({
   activeMachine,
   onGoHome,
+  onSelectMachine,
   learningMode,
   onSelectLearningMode,
   language,
@@ -24,184 +25,262 @@ export default function Header({
 
   return (
     <header className="site-header" role="banner">
-      <div className="header-top-row">
-        <div className="brand-group">
+      <div className="header-inner">
+        {/* Left: Brand Identity & Primary Navigation */}
+        <div className="header-primary-nav">
           <button
             type="button"
             className="brand-home-btn"
             onClick={onGoHome}
-            aria-label="Go to Kiosk of Confidence Home Screen"
+            aria-label="Kiosk of Confidence Home"
           >
-            <span className="brand-icon" aria-hidden="true">
-              🖥️
+            <span className="brand-logo-mark" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect x="3" y="3" width="22" height="22" rx="6" fill="currentColor" opacity="0.15" />
+                <rect x="4" y="4" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2.2" />
+                <path
+                  d="M9.5 14.5L12.5 17.5L18.5 11"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </span>
             <div className="brand-titles">
               <span className="brand-name">Kiosk of Confidence</span>
-              {showUrdu && (
+              {showUrdu ? (
                 <span className="brand-urdu" lang="ur" dir="rtl">
-                  اعتماد کا کیوسک — بے خوف ہو کر مشین استعمال کرنا سیکھیں
+                  اعتماد کا کیوسک
                 </span>
+              ) : (
+                <span className="brand-subtitle">Touchscreen Practice Platform</span>
               )}
             </div>
           </button>
-          <span className="safe-simulation-pill">
-            🛡️ 100% Safe Simulation • محفوظ مشق
-          </span>
-        </div>
 
-        <div className="header-utility-controls" aria-label="Accessibility and support tools">
-          {/* Language Switcher */}
-          <div className="control-pill-group" role="group" aria-label="Language selection">
+          <nav className="primary-nav-links" aria-label="Primary navigation">
             <button
               type="button"
-              className={`utility-btn ${language === 'both' ? 'active' : ''}`}
+              className={`nav-link-btn ${activeMachine === 'home' ? 'current' : ''}`}
+              onClick={onGoHome}
+            >
+              <span aria-hidden="true">🏠</span>
+              <span>Home</span>
+              {showUrdu && (
+                <span className="urdu-nav-label" lang="ur" dir="rtl">
+                  ہوم
+                </span>
+              )}
+            </button>
+
+            {typeof onSelectMachine === 'function' && (
+              <>
+                <button
+                  type="button"
+                  className={`nav-link-btn ${activeMachine === 'atm' ? 'current' : ''}`}
+                  onClick={() => onSelectMachine('atm')}
+                >
+                  <span aria-hidden="true">🏧</span>
+                  <span>ATM</span>
+                </button>
+                <button
+                  type="button"
+                  className={`nav-link-btn ${activeMachine === 'ticket' ? 'current' : ''}`}
+                  onClick={() => onSelectMachine('ticket')}
+                >
+                  <span aria-hidden="true">🎫</span>
+                  <span>Tickets</span>
+                </button>
+                <button
+                  type="button"
+                  className={`nav-link-btn ${activeMachine === 'food' ? 'current' : ''}`}
+                  onClick={() => onSelectMachine('food')}
+                >
+                  <span aria-hidden="true">🍔</span>
+                  <span>Food</span>
+                </button>
+              </>
+            )}
+          </nav>
+        </div>
+
+        {/* Right: Consistently Grouped Accessibility & Support Controls */}
+        <div
+          className="accessibility-toolbar"
+          role="region"
+          aria-label="Accessibility and support controls"
+        >
+          {/* Language Switcher Pill Group */}
+          <div className="a11y-control-group" role="group" aria-label="Language selection">
+            <button
+              type="button"
+              className={`a11y-segment-btn ${language === 'both' ? 'active' : ''}`}
               onClick={() => onChangeLanguage('both')}
-              title="Show both English and Urdu instructions"
+              title="Show both English and Urdu"
             >
               EN + اردو
             </button>
             <button
               type="button"
-              className={`utility-btn ${language === 'en' ? 'active' : ''}`}
+              className={`a11y-segment-btn ${language === 'en' ? 'active' : ''}`}
               onClick={() => onChangeLanguage('en')}
-              title="Show English instructions only"
+              title="English only"
             >
-              English
+              EN
             </button>
             <button
               type="button"
-              className={`utility-btn ${language === 'ur' ? 'active' : ''}`}
+              className={`a11y-segment-btn ${language === 'ur' ? 'active' : ''}`}
               onClick={() => onChangeLanguage('ur')}
-              title="صرف اردو ہدایات دکھائیں"
+              title="صرف اردو"
               lang="ur"
             >
               اردو
             </button>
           </div>
 
-          {/* Text Size Toggle */}
-          <button
-            type="button"
-            className={`utility-btn text-size-btn ${largeText ? 'active' : ''}`}
-            onClick={onToggleLargeText}
-            aria-pressed={largeText}
-            title="Toggle Extra Large Text for easier reading"
-          >
-            {largeText ? '🔍 Text: Extra Large (A+)' : '🔍 Text: Large (A+)'}
-          </button>
-
-          {/* Browser Text-to-Speech Listen Button */}
-          <button
-            type="button"
-            className={`utility-btn listen-btn ${isSpeaking ? 'speaking' : ''}`}
-            onClick={onSpeakCurrentScreen}
-            title={
-              ttsSupported
-                ? 'Listen to the instructions on this screen read aloud'
-                : 'Audio speech is not supported in this browser'
-            }
-          >
-            {isSpeaking ? (
-              <>
-                ⏹ Stop Audio {showUrdu && <span lang="ur">• آواز روکیں</span>}
-              </>
-            ) : (
-              <>
-                🔊 Listen {showUrdu && <span lang="ur">• ہدایات سنیں</span>}
-              </>
-            )}
-          </button>
-
-          {/* Contextual Help Toggle */}
-          <button
-            type="button"
-            className={`utility-btn help-toggle-btn ${isHelpOpen ? 'active' : ''}`}
-            onClick={onToggleHelp}
-            aria-expanded={isHelpOpen}
-          >
-            ❓ Help {showUrdu && <span lang="ur">• مدد</span>}
-          </button>
-
-          {/* Explicit Home button when inside a simulator */}
-          {activeMachine !== 'home' && (
+          <div className="a11y-actions-group">
+            {/* Text Size Toggle */}
             <button
               type="button"
-              className="utility-btn home-nav-btn"
-              onClick={onGoHome}
+              className={`utility-btn text-size-btn ${largeText ? 'active' : ''}`}
+              onClick={onToggleLargeText}
+              aria-pressed={largeText}
+              title="Toggle larger text size"
             >
-              🏠 Home {showUrdu && <span lang="ur">• ہوم پیج</span>}
+              <span className="utility-icon" aria-hidden="true">Aa</span>
+              <span>{largeText ? 'Text: Extra Large' : 'Text: Standard'}</span>
             </button>
-          )}
+
+            {/* Browser Text-to-Speech Listen Button */}
+            <button
+              type="button"
+              className={`utility-btn listen-btn ${isSpeaking ? 'speaking' : ''}`}
+              onClick={onSpeakCurrentScreen}
+              title={
+                ttsSupported
+                  ? 'Listen to screen instructions read aloud'
+                  : 'Audio speech is not supported in this browser'
+              }
+            >
+              <span aria-hidden="true">{isSpeaking ? '⏹' : '🔊'}</span>
+              <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
+              {showUrdu && (
+                <span className="urdu-inline" lang="ur" dir="rtl">
+                  {isSpeaking ? 'روکیں' : 'سنیں'}
+                </span>
+              )}
+            </button>
+
+            {/* Contextual Help Toggle */}
+            <button
+              type="button"
+              className={`utility-btn help-toggle-btn ${isHelpOpen ? 'active' : ''}`}
+              onClick={onToggleHelp}
+              aria-expanded={isHelpOpen}
+            >
+              <span aria-hidden="true">❓</span>
+              <span>Help</span>
+              {showUrdu && (
+                <span className="urdu-inline" lang="ur" dir="rtl">
+                  مدد
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mode Switcher Bar when inside any simulator */}
+      {/* Dedicated, Clearly Visible Learning Mode Selector Bar */}
       {activeMachine !== 'home' && (
-        <div className="mode-switcher-bar" role="navigation" aria-label="Learning mode selection">
-          <div className="mode-switcher-label">
-            {showEnglish && <span>Choose How You Want to Practice:</span>}
-            {showUrdu && (
-              <span className="urdu-inline" lang="ur" dir="rtl">
-                مشق کا طریقہ منتخب کریں:
-              </span>
-            )}
-          </div>
-
-          <div className="mode-buttons">
-            <button
-              type="button"
-              className={`mode-tab-btn ${learningMode === 'learn' ? 'active' : ''}`}
-              onClick={() => onSelectLearningMode('learn')}
-            >
-              <span className="mode-icon" aria-hidden="true">📖</span>
-              <div className="mode-text">
-                <strong>1. Learn Mode</strong>
-                <small>Explains every part of this screen</small>
+        <div className="dedicated-mode-bar" role="navigation" aria-label="Learning mode selector">
+          <div className="dedicated-mode-inner">
+            <div className="mode-bar-header">
+              <div className="mode-bar-title">
+                {showEnglish && <span>Learning Mode:</span>}
                 {showUrdu && (
-                  <small className="urdu-block" lang="ur" dir="rtl">
-                    سیکھنے کا طریقہ (ہر بٹن کی وضاحت)
-                  </small>
+                  <span className="urdu-inline" lang="ur" dir="rtl">
+                    سیکھنے کا مرحلہ:
+                  </span>
                 )}
               </div>
-            </button>
+              <button
+                type="button"
+                className="back-to-home-pill"
+                onClick={onGoHome}
+              >
+                ← All Machines {showUrdu && <span lang="ur">• تمام مشینیں</span>}
+              </button>
+            </div>
 
-            <button
-              type="button"
-              className={`mode-tab-btn ${learningMode === 'practice' ? 'active' : ''}`}
-              onClick={() => onSelectLearningMode('practice')}
-            >
-              <span className="mode-icon" aria-hidden="true">🎯</span>
-              <div className="mode-text">
-                <strong>2. Guided Practice</strong>
-                <small>Step-by-step hints & mistake recovery</small>
-                {showUrdu && (
-                  <small className="urdu-block" lang="ur" dir="rtl">
-                    رہنمائی کے ساتھ مشق (اشاروں کے ساتھ)
-                  </small>
-                )}
-              </div>
-            </button>
+            <div className="mode-selector-grid" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={learningMode === 'learn'}
+                className={`mode-tab-btn ${learningMode === 'learn' ? 'active' : ''}`}
+                onClick={() => onSelectLearningMode('learn')}
+              >
+                <span className="mode-step-num">1</span>
+                <div className="mode-text">
+                  <div className="mode-title-line">
+                    <strong>Learn</strong>
+                    {showUrdu && (
+                      <span className="urdu-inline" lang="ur" dir="rtl">
+                        سیکھیں
+                      </span>
+                    )}
+                  </div>
+                  <small>Understand every button on screen</small>
+                </div>
+              </button>
 
-            <button
-              type="button"
-              className={`mode-tab-btn ${learningMode === 'independent' ? 'active' : ''}`}
-              onClick={() => onSelectLearningMode('independent')}
-            >
-              <span className="mode-icon" aria-hidden="true">⭐</span>
-              <div className="mode-text">
-                <strong>3. Independent Practice</strong>
-                <small>Fewer hints — just like a real machine</small>
-                {showUrdu && (
-                  <small className="urdu-block" lang="ur" dir="rtl">
-                    خودکار مشق (کم اشارے — حقیقی مشین کی طرح)
-                  </small>
-                )}
-              </div>
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={learningMode === 'practice'}
+                className={`mode-tab-btn ${learningMode === 'practice' ? 'active' : ''}`}
+                onClick={() => onSelectLearningMode('practice')}
+              >
+                <span className="mode-step-num">2</span>
+                <div className="mode-text">
+                  <div className="mode-title-line">
+                    <strong>Guided Practice</strong>
+                    {showUrdu && (
+                      <span className="urdu-inline" lang="ur" dir="rtl">
+                        رہنمائی کے ساتھ مشق
+                      </span>
+                    )}
+                  </div>
+                  <small>Step-by-step hints & mistake recovery</small>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={learningMode === 'independent'}
+                className={`mode-tab-btn ${learningMode === 'independent' ? 'active' : ''}`}
+                onClick={() => onSelectLearningMode('independent')}
+              >
+                <span className="mode-step-num">3</span>
+                <div className="mode-text">
+                  <div className="mode-title-line">
+                    <strong>Independent Practice</strong>
+                    {showUrdu && (
+                      <span className="urdu-inline" lang="ur" dir="rtl">
+                        خودکار مشق
+                      </span>
+                    )}
+                  </div>
+                  <small>Fewer hints — just like a real machine</small>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       )}
     </header>
   )
 }
-
